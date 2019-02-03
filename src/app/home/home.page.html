@@ -1,12 +1,22 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>
-      Ionic Blank
+      Chat webRTC
     </ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content padding>
-  The world is your oyster.
-  <p>If you get lost, the <a target="_blank" rel="noopener" href="https://ionicframework.com/docs/">docs</a> will be your guide.</p>
+  <ion-item>
+    <ion-label position="stacked">Introduzca un nick</ion-label>
+    <ion-input type="text" [(ngModel)]="nickname" placeholder="Nickname"></ion-input>
+  </ion-item>
+  <ion-item>
+    <ion-label position="stacked">Introduzca una ID</ion-label>
+    <ion-input type="text" [(ngModel)]="idRoom" placeholder="idRoom"></ion-input>
+  </ion-item>
+
+  <br />
+
+  <div text-center><ion-button expand="block" (click)="joinChat()" [disabled]="nickname === '' && idRoom === ''">Unirse a la sala</ion-button></div>
 </ion-content>

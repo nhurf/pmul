@@ -1,0 +1,69 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>chatRoom</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-grid>
+    <ion-row *ngFor="let message of messages">
+      <div *ngIf="message.from === nickname; then notFrom else mFrom"></div>
+      <ng-template #notFrom>
+        <ion-col size="9" class="message" [ngClass]="'message other_message'">
+          <span class="user_name">{{ message.from }}:</span><br>
+          <span>{{ message.text }}</span>
+          <div class="time">{{message.created | date:'dd.MM hh:MM'}}</div>
+        </ion-col>
+      </ng-template>
+      
+      <ng-template #mFrom>
+        <ion-col size="9" offset="3" class="message" [ngClass]="'message my_message'">
+          <span class="user_name">{{ message.from }}:</span><br>
+          <span>{{ message.text }}</span>
+          <div class="time">{{message.created | date:'dd.MM hh:MM'}}</div>
+        </ion-col>
+      </ng-template>
+    </ion-row>
+
+    <!--Para recibir los mensajes con imagen-->
+
+    <ion-row *ngFor="let image of images">
+      <div *ngIf="image.from === nickname; then notFrom else mFrom"></div>
+      <ng-template #notFrom>
+        <ion-col size="9" class="message" [ngClass]="'message other_message'">
+          <span class="user_name">{{ image.from }}:</span><br>
+          <img src="{{ image.text }}" />
+          <div class="time">{{image.created | date:'dd.MM hh:MM'}}</div>
+        </ion-col>
+      </ng-template>
+      
+      <ng-template #mFrom>
+        <ion-col size="9" offset="3" class="message" [ngClass]="'message my_message'">
+          <span class="user_name">{{ image.from }}:</span><br>
+          <img src="{{ image.text }}" />
+          <div class="time">{{image.created | date:'dd.MM hh:MM'}}</div>
+        </ion-col>
+      </ng-template>
+    </ion-row>
+  </ion-grid>
+</ion-content>
+ 
+<ion-footer>
+  <ion-toolbar>
+    <ion-row class="message_row">
+      <ion-col size="7">
+        <ion-item no-lines>
+          <ion-input type="text" placeholder="Escriba aquí su mensaje" [(ngModel)]="message"></ion-input>
+        </ion-item>
+      </ion-col>
+      <ion-col size="2">
+        <ion-button clear (click)="presentActionSheet()"><ion-icon name="attach"></ion-icon></ion-button>
+      </ion-col>
+      <ion-col size="3">
+        <ion-button clear color="primary" (click)="sendMessage()" [disabled]="message === ''">
+        Enviar
+        </ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-toolbar>
+</ion-footer>
