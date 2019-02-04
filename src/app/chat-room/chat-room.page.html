@@ -1,6 +1,16 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>chatRoom</ion-title>
+    <ion-row class="message_row">
+        <ion-col size="6">
+          <ion-title>chatRoom</ion-title>
+        </ion-col>
+        <ion-col size="3">
+          <ion-button clear (click)="createVideo()"><ion-icon name="videocam"></ion-icon></ion-button>
+        </ion-col>
+        <ion-col size="3">
+            <ion-button clear (click)="createCall()"><ion-icon name="call"></ion-icon></ion-button>
+          </ion-col>
+      </ion-row>
   </ion-toolbar>
 </ion-header>
 

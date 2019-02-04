@@ -8,6 +8,10 @@ import { Base64 } from '@ionic-native/base64/ngx';
 import { ActionSheetController } from '@ionic/angular'; // mirar si nececsita import, imagin oque no
 import { ImagePicker } from '@ionic-native/image-picker/ngx'; //add cordova (mirar si lo sotros necesitan add)
 
+//npm WARN @ionic-native/image-picker@5.0.0 requires a peer of rxjs@* but none is installed. You must install peer dependencies yourself.
+//npm WARN @ionic-native/image-picker@5.0.0 requires a peer of @ionic-native/core@5.0.0 but none is installed. You must install peer dependencies yourself.
+// https://github.com/sivasankars/webrtc-image-snap/blob/master/public/js/main.js
+
 @Component({
   selector: 'app-chat-room',
   templateUrl: './chat-room.page.html',
@@ -46,7 +50,15 @@ export class ChatRoomPage implements OnInit {
     });
   }
 
-  isImageToFalse(){
+  createVideo() {
+    
+  }
+
+  createCall() {
+
+  }
+
+  isImageToFalse() {
     this.isImage = false;
   }
 

@@ -12,7 +12,7 @@ import { SocketIoModule, SocketIoConfig } from 'ng-socket-io';
 import { Camera } from '@ionic-native/Camera/ngx';
 import { Base64 } from '@ionic-native/base64/ngx';
 
-const config: SocketIoConfig = { url: 'http://192.168.1.38:3001', options: {} };
+const config: SocketIoConfig = { url: 'http://35.246.35.75:3001', options: {} };
 
 @NgModule({
   declarations: [AppComponent],
