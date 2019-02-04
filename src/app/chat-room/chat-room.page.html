@@ -7,25 +7,47 @@
 <ion-content>
   <ion-grid>
     <ion-row *ngFor="let message of messages">
-      <div *ngIf="message.from === nickname; then notFrom else mFrom"></div>
-      <ng-template #notFrom>
-        <ion-col size="9" class="message" [ngClass]="'message other_message'">
-          <span class="user_name">{{ message.from }}:</span><br>
-          <span>{{ message.text }}</span>
-          <div class="time">{{message.created | date:'dd.MM hh:MM'}}</div>
-        </ion-col>
-      </ng-template>
-      
-      <ng-template #mFrom>
-        <ion-col size="9" offset="3" class="message" [ngClass]="'message my_message'">
-          <span class="user_name">{{ message.from }}:</span><br>
-          <span>{{ message.text }}</span>
-          <div class="time">{{message.created | date:'dd.MM hh:MM'}}</div>
-        </ion-col>
-      </ng-template>
+      <ion-row *ngFor="let image of images">
+        <div *ngIf="message.from || image.from === nickname; then notFrom else mFrom"></div>
+        <ng-template #notFrom>
+          <ng-container *ngIf="isImage === true;else noImage">
+            <ion-col size="9" class="message" [ngClass]="'message other_message'">
+                <span class="user_name">{{ image.from }}:</span><br>
+                <img src="{{ image.text }}" />
+                <div class="time">{{image.created | date:'dd.MM hh:MM'}}</div>
+                {{ isImageToFalse() }}
+              </ion-col>
+          </ng-container>
+          <ng-template #noImage>
+            <ion-col size="9" class="message" [ngClass]="'message other_message'">
+                <span class="user_name">{{ message.from }}:</span><br>
+                <span>{{ message.text }}</span>
+                <div class="time">{{message.created | date:'dd.MM hh:MM'}}</div>
+              </ion-col>
+          </ng-template>
+        </ng-template>
+        
+        <ng-template #mFrom>
+          <ng-container *ngIf="isImage === true;else noImage">
+            <ion-col size="9" offset="3" class="message" [ngClass]="'message my_message'">
+                <span class="user_name">{{ image.from }}:</span><br>
+                <img src="{{ image.text }}" />
+                <div class="time">{{image.created | date:'dd.MM hh:MM'}}</div>
+                {{ isImageToFalse() }}
+            </ion-col>
+          </ng-container>
+          <ng-template #noImage>
+            <ion-col size="9" class="message" [ngClass]="'message other_message'">
+              <span class="user_name">{{ message.from }}:</span><br>
+              <span>{{ message.text }}</span>
+              <div class="time">{{message.created | date:'dd.MM hh:MM'}}</div>
+            </ion-col>
+          </ng-template>
+        </ng-template>
+      </ion-row>
     </ion-row>
 
-    <!--Para recibir los mensajes con imagen-->
+    <!--Para recibir los mensajes con imagen
 
     <ion-row *ngFor="let image of images">
       <div *ngIf="image.from === nickname; then notFrom else mFrom"></div>
@@ -46,7 +68,7 @@
       </ng-template>
     </ion-row>
   </ion-grid>
-</ion-content>
+</ion-content>-->
  
 <ion-footer>
   <ion-toolbar>

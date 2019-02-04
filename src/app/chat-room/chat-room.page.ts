@@ -6,6 +6,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Camera, CameraOptions, PictureSourceType } from '@ionic-native/Camera/ngx';
 import { Base64 } from '@ionic-native/base64/ngx';
 import { ActionSheetController } from '@ionic/angular'; // mirar si nececsita import, imagin oque no
+import { ImagePicker } from '@ionic-native/image-picker/ngx'; //add cordova (mirar si lo sotros necesitan add)
 
 @Component({
   selector: 'app-chat-room',
@@ -22,7 +23,7 @@ export class ChatRoomPage implements OnInit {
 
   constructor(private navCtrl: NavController, private route: ActivatedRoute,
     private socket: Socket, private toastCtrl: ToastController, private camera: Camera, private base64: Base64,
-    public actionSheetController: ActionSheetController) {}
+    public actionSheetController: ActionSheetController, private imagePicker: ImagePicker) {}
 
   ngOnInit() {
     this.nickname = this.route.snapshot.paramMap.get('nickname');
@@ -45,6 +46,10 @@ export class ChatRoomPage implements OnInit {
     });
   }
 
+  isImageToFalse(){
+    this.isImage = false;
+  }
+
   sendMessage() {
     this.socket.emit('add-message', { text: this.message });
     this.message = '';
@@ -58,6 +63,7 @@ export class ChatRoomPage implements OnInit {
     const observable = new Observable(observer => {
       this.socket.on('image', (data) => {
         observer.next(data);
+        this.isImage = true;
       });
     });
     return observable;
@@ -123,7 +129,7 @@ export class ChatRoomPage implements OnInit {
       correctOrientation: true
     };
 
-    this.camera.getPicture( options )
+    this.imagePicker.getPictures( options )
     .then(imageData => {
       const dataI = 'data:image/jpeg;base64,' + imageData;
       this.sendImage(dataI);
