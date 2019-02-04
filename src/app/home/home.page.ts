@@ -35,15 +35,8 @@ export class HomePage {
  
   joinChat() {
     this.socket.connect();
+    this.socket.emit('create', this.room);
     this.socket.emit('set-nickname', this.nickname);
-    this.socket.emit('create-join', this.room);
-    this.navCtrl.navigateForward('/chat-room/' + this.nickname + this.room);
-  }
-
-  createChat() {
-    this.socket.connect();
-    this.socket.emit('set-nickname', this.nickname);
-    this.socket.emit('create-join', this.room);
     this.navCtrl.navigateForward('/chat-room/' + this.nickname + this.room);
   }
 

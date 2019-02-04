@@ -18,7 +18,5 @@
 
   <br />
 
-  <div text-center><ion-button expand="block" (click)="createChat()" [disabled]="nickname === '' && room === ''">Crear sala</ion-button></div>
-  <br />
-  <div text-center><ion-button expand="block" (click)="joinChat()" [disabled]="nickname === '' && room === ''">Unirse a la sala</ion-button></div>
+  <div text-center><ion-button expand="block" (click)="joinChat()" [disabled]="nickname === '' && room === ''">Crear o unirse a la sala</ion-button></div>
 </ion-content>
