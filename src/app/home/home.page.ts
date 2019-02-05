@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Socket } from 'ng-socket-io';
 import { NavController, ToastController } from '@ionic/angular';
 import { Observable } from 'rxjs/Observable';
@@ -8,7 +8,7 @@ import { Observable } from 'rxjs/Observable';
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
 })
-export class HomePage {
+export class HomePage implements OnInit {
 
   nickname = '';
   room = '';
@@ -19,7 +19,7 @@ export class HomePage {
     this.getLog().subscribe(data => {
       if (data === 'full') {
         this.showToast('La sala está llena');
-      } 
+      }
     });
   }
 
@@ -32,12 +32,12 @@ export class HomePage {
     toast.present();
 
   }
- 
+
   joinChat() {
     this.socket.connect();
     this.socket.emit('create', this.room);
     this.socket.emit('set-nickname', this.nickname);
-    this.navCtrl.navigateForward('/chat-room/' + this.nickname + this.room);
+    this.navCtrl.navigateForward('/chat-room/' + this.nickname);
   }
 
   getLog() {

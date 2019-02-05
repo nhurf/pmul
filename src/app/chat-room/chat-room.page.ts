@@ -3,13 +3,15 @@ import { NavController, ToastController } from '@ionic/angular';
 import { Socket } from 'ng-socket-io';
 import { Observable } from 'rxjs/Observable';
 import { ActivatedRoute } from '@angular/router';
-import { Camera, CameraOptions, PictureSourceType } from '@ionic-native/Camera/ngx';
+import { Camera, CameraOptions } from '@ionic-native/Camera/ngx';
 import { Base64 } from '@ionic-native/base64/ngx';
-import { ActionSheetController } from '@ionic/angular'; // mirar si nececsita import, imagin oque no
-import { ImagePicker } from '@ionic-native/image-picker/ngx'; //add cordova (mirar si lo sotros necesitan add)
+import { ActionSheetController } from '@ionic/angular';
+import { ImagePicker } from '@ionic-native/image-picker/ngx';
+import { FileTransfer, FileUploadOptions, FileTransferObject } from '@ionic-native/file-transfer/ngx';
+import { File } from '@ionic-native/file/ngx';
 
-//npm WARN @ionic-native/image-picker@5.0.0 requires a peer of rxjs@* but none is installed. You must install peer dependencies yourself.
-//npm WARN @ionic-native/image-picker@5.0.0 requires a peer of @ionic-native/core@5.0.0 but none is installed. You must install peer dependencies yourself.
+//  requires a peer of rxjs@* but none is installed. You must install peer dependencies yourself.
+//  requires a peer of @ionic-native/core@5.0.0 but none is installed. You must install peer dependencies yourself.
 // https://github.com/sivasankars/webrtc-image-snap/blob/master/public/js/main.js
 
 @Component({
@@ -20,24 +22,20 @@ import { ImagePicker } from '@ionic-native/image-picker/ngx'; //add cordova (mir
 export class ChatRoomPage implements OnInit {
 
   messages = [];
-  images = [];
   nickname = '';
   message = '';
-  isImage = false;
+  room = '';
 
   constructor(private navCtrl: NavController, private route: ActivatedRoute,
     private socket: Socket, private toastCtrl: ToastController, private camera: Camera, private base64: Base64,
-    public actionSheetController: ActionSheetController, private imagePicker: ImagePicker) {}
+    public actionSheetController: ActionSheetController, private imagePicker: ImagePicker,
+    private transfer: FileTransfer, private file: File) { }
 
   ngOnInit() {
     this.nickname = this.route.snapshot.paramMap.get('nickname');
 
     this.getMessages().subscribe(message => {
       this.messages.push(message);
-    });
-
-    this.getImages().subscribe(image => {
-      this.images.push(image);
     });
 
     this.getUsers().subscribe(data => {
@@ -51,34 +49,21 @@ export class ChatRoomPage implements OnInit {
   }
 
   createVideo() {
-    
+
   }
 
   createCall() {
 
   }
 
-  isImageToFalse() {
-    this.isImage = false;
-  }
-
   sendMessage() {
-    this.socket.emit('add-message', { text: this.message });
+    this.socket.emit('add-message', { text: this.message, isImage: false });
     this.message = '';
   }
 
   sendImage(image: any) {
-    this.socket.emit('add-image', { text: image });
-  }
-
-  getImages() {
-    const observable = new Observable(observer => {
-      this.socket.on('image', (data) => {
-        observer.next(data);
-        this.isImage = true;
-      });
-    });
-    return observable;
+    this.socket.emit('add-message', { text: image, isImage: true });
+    this.message = '';
   }
 
   getMessages() {
@@ -120,35 +105,31 @@ export class ChatRoomPage implements OnInit {
       targetHeight: 1000,
       quality: 100
     };
-    this.camera.getPicture( options )
-    .then(imageData => {
-      const dataI = 'data:image/jpeg;base64,' + imageData;
-      this.sendImage(dataI);
-    })
-    .catch(error => {
-      console.error( error );
-    });
+    this.camera.getPicture(options)
+      .then(imageData => {
+        const dataI = 'data:image/jpeg;base64,' + imageData;
+        this.sendImage(dataI);
+      })
+      .catch(error => {
+        console.error(error);
+      });
   }
 
   getGallery() {
     const options: CameraOptions = {
-      sourceType: this.camera.PictureSourceType.PHOTOLIBRARY,
-      destinationType: this.camera.DestinationType.FILE_URI,
       quality: 100,
-      targetWidth: 1000,
-      targetHeight: 1000,
+      sourceType: this.camera.PictureSourceType.PHOTOLIBRARY,
+      destinationType: this.camera.DestinationType.DATA_URL,
       encodingType: this.camera.EncodingType.JPEG,
-      correctOrientation: true
+      mediaType: this.camera.MediaType.PICTURE
     };
-
-    this.imagePicker.getPictures( options )
-    .then(imageData => {
+    this.camera.getPicture(options).then((imageData) => {
       const dataI = 'data:image/jpeg;base64,' + imageData;
       this.sendImage(dataI);
-    })
-    .catch(error => {
-      console.error( error );
-    });
+     }, (err) => {
+      // Handle error
+      console.log(err);
+     });
   }
 
   getFile() {
@@ -169,12 +150,14 @@ export class ChatRoomPage implements OnInit {
         text: 'Galería',
         icon: 'image',
         handler: () => {
+          this.getGallery();
           console.log('Gallery clicked');
         }
       }, {
         text: 'Archivos',
         icon: 'document',
         handler: () => {
+          this.getFile();
           console.log('Play clicked');
         }
       }, {
