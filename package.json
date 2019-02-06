@@ -23,7 +23,6 @@
     "@ionic-native/base64": "^5.0.0",
     "@ionic-native/camera": "^5.0.0",
     "@ionic-native/core": "^5.0.0",
-    "@ionic-native/file": "^5.0.0",
     "@ionic-native/file-transfer": "^5.0.0",
     "@ionic-native/image-picker": "^5.0.0",
     "@ionic-native/native-audio": "^5.0.0",
