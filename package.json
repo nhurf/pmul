@@ -26,11 +26,16 @@
     "@ionic-native/file": "^5.0.0",
     "@ionic-native/file-transfer": "^5.0.0",
     "@ionic-native/image-picker": "^5.0.0",
+    "@ionic-native/native-audio": "^5.0.0",
     "@ionic-native/splash-screen": "^5.0.0",
     "@ionic-native/status-bar": "^5.0.0",
     "@ionic-native/toast": "^5.0.0",
     "@ionic/angular": "^4.0.0",
     "@ionic/storage": "^2.2.0",
+<<<<<<< HEAD
+=======
+    "android-camera-permission": "^1.0.0",
+>>>>>>> cb1fd8845eeb4d4c350d5df6b605b73bc028c2b7
     "com-badrit-base64": "0.2.0",
     "cordova-android": "7.1.4",
     "cordova-plugin-camera": "4.0.3",
@@ -44,6 +49,7 @@
     "cordova-plugin-telerik-imagepicker": "2.2.3",
     "cordova-plugin-whitelist": "^1.3.3",
     "cordova-plugin-x-toast": "2.7.2",
+    "cordova-sqlite-storage": "3.0.0",
     "core-js": "^2.5.4",
     "express": "^4.16.4",
     "ng-socket-io": "^0.2.4",
@@ -95,6 +101,8 @@
       },
       "cordova-plugin-ionic-keyboard": {},
       "com-badrit-base64": {},
+      "cordova-plugin-nativeaudio": {},
+      "android-camera-permission": {},
       "cordova-sqlite-storage": {}
     },
     "platforms": [
