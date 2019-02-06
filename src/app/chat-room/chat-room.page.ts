@@ -7,8 +7,9 @@ import { Camera, CameraOptions } from '@ionic-native/Camera/ngx';
 import { Base64 } from '@ionic-native/base64/ngx';
 import { ActionSheetController } from '@ionic/angular';
 import { ImagePicker } from '@ionic-native/image-picker/ngx';
-import { FileTransfer, FileUploadOptions, FileTransferObject } from '@ionic-native/file-transfer/ngx';
-import { File } from '@ionic-native/file/ngx';
+import { NativeAudio } from '@ionic-native/native-audio/ngx';
+import { GlobalService } from './../global.service';
+import { Storage } from '@ionic/storage';
 
 //  requires a peer of rxjs@* but none is installed. You must install peer dependencies yourself.
 //  requires a peer of @ionic-native/core@5.0.0 but none is installed. You must install peer dependencies yourself.
@@ -25,17 +26,36 @@ export class ChatRoomPage implements OnInit {
   nickname = '';
   message = '';
   room = '';
+  myId;
+  otherId;
 
   constructor(private navCtrl: NavController, private route: ActivatedRoute,
     private socket: Socket, private toastCtrl: ToastController, private camera: Camera, private base64: Base64,
-    public actionSheetController: ActionSheetController, private imagePicker: ImagePicker,
-    private transfer: FileTransfer, private file: File) { }
+    public actionSheetController: ActionSheetController, private imagePicker: ImagePicker, public global: GlobalService,
+    private storage: Storage) {
+      this.storage.get('id').then((val) => {
+        this.myId = val;
+        console.log(this.myId);
+      });
+    }
+
+  sendtext() {
+
+  }
 
   ngOnInit() {
     this.nickname = this.route.snapshot.paramMap.get('nickname');
 
     this.getMessages().subscribe(message => {
       this.messages.push(message);
+    });
+
+    this.getId().subscribe(data => {
+      const d = data['id'];
+      if (d !== this.myId) {
+        this.otherId = d;
+        console.log('ID del otro ' + d);
+      }
     });
 
     this.getUsers().subscribe(data => {
@@ -59,11 +79,21 @@ export class ChatRoomPage implements OnInit {
   sendMessage() {
     this.socket.emit('add-message', { text: this.message, isImage: false });
     this.message = '';
+    this.sendtext();
   }
 
   sendImage(image: any) {
     this.socket.emit('add-message', { text: image, isImage: true });
     this.message = '';
+  }
+
+  getId() {
+    const observable = new Observable(observer => {
+      this.socket.on('id', (data) => {
+        observer.next(data);
+      });
+    });
+    return observable;
   }
 
   getMessages() {
@@ -126,10 +156,10 @@ export class ChatRoomPage implements OnInit {
     this.camera.getPicture(options).then((imageData) => {
       const dataI = 'data:image/jpeg;base64,' + imageData;
       this.sendImage(dataI);
-     }, (err) => {
+    }, (err) => {
       // Handle error
       console.log(err);
-     });
+    });
   }
 
   getFile() {

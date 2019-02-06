@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Socket } from 'ng-socket-io';
 import { NavController, ToastController } from '@ionic/angular';
 import { Observable } from 'rxjs/Observable';
+import { Storage } from '@ionic/storage';
 
 @Component({
   selector: 'app-home',
@@ -12,8 +13,11 @@ export class HomePage implements OnInit {
 
   nickname = '';
   room = '';
+  myId;
+  peer;
 
-  constructor(public navCtrl: NavController, private socket: Socket, private toastCtrl: ToastController) { }
+  constructor(public navCtrl: NavController, private socket: Socket, private toastCtrl: ToastController,
+    private storage: Storage) { this.createPeer(); }
 
   ngOnInit() {
     this.getLog().subscribe(data => {
@@ -21,6 +25,15 @@ export class HomePage implements OnInit {
         this.showToast('La sala está llena');
       }
     });
+  }
+
+  createPeer() {
+    this.peer = new Peer({ key: 'lwjd5qra8257b9' });
+    setTimeout(() => {
+      this.myId = this.peer.id;
+      this.storage.set('id', this.peer.id);
+      console.log('My peer ID is: ' + this.myId);
+    }, 3000);
   }
 
   async showToast(msg) {
@@ -37,6 +50,7 @@ export class HomePage implements OnInit {
     this.socket.connect();
     this.socket.emit('create', this.room);
     this.socket.emit('set-nickname', this.nickname);
+    this.socket.emit('myId', this.myId);
     this.navCtrl.navigateForward('/chat-room/' + this.nickname);
   }
 
