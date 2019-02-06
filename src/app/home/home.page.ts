@@ -3,6 +3,7 @@ import { Socket } from 'ng-socket-io';
 import { NavController, ToastController } from '@ionic/angular';
 import { Observable } from 'rxjs/Observable';
 import { Storage } from '@ionic/storage';
+declare var Peer: any;
 
 @Component({
   selector: 'app-home',
