@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Socket } from 'ng-socket-io';
 import { NavController, ToastController } from '@ionic/angular';
 import { Observable } from 'rxjs/Observable';
-import { Storage } from '@ionic/storage';
 declare var Peer: any;
 
 @Component({
@@ -17,8 +16,7 @@ export class HomePage implements OnInit {
   myId;
   peer;
 
-  constructor(public navCtrl: NavController, private socket: Socket, private toastCtrl: ToastController,
-    private storage: Storage) { this.createPeer(); }
+  constructor(public navCtrl: NavController, private socket: Socket, private toastCtrl: ToastController) { this.createPeer(); }
 
   ngOnInit() {
     this.getLog().subscribe(data => {
@@ -29,12 +27,12 @@ export class HomePage implements OnInit {
   }
 
   createPeer() {
-    this.peer = new Peer({ key: 'lwjd5qra8257b9' });
-    setTimeout(() => {
-      this.myId = this.peer.id;
-      this.storage.set('id', this.peer.id);
-      console.log('My peer ID is: ' + this.myId);
-    }, 3000);
+    //this.peer = new Peer({ key: 'lwjd5qra8257b9' });
+    //setTimeout(() => {
+      //this.myId = this.peer.id;
+      //this.storage.set('id', this.peer.id);
+      //console.log('My peer ID is: ' + this.myId);
+    //}, 3000);
   }
 
   async showToast(msg) {

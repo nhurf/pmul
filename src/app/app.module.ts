@@ -12,8 +12,6 @@ import { SocketIoModule, SocketIoConfig } from 'ng-socket-io';
 import { Camera } from '@ionic-native/Camera/ngx';
 import { Base64 } from '@ionic-native/base64/ngx';
 import { ImagePicker } from '@ionic-native/image-picker/ngx';
-import { GlobalService } from './global.service';
-import { IonicStorageModule } from '@ionic/storage';
 
 const config: SocketIoConfig = { url: 'http://95.179.148.127:3001', options: {} };
 declare var Peer: any;
@@ -21,14 +19,13 @@ declare var Peer: any;
 @NgModule({
   declarations: [AppComponent],
   entryComponents: [],
-  imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule, SocketIoModule.forRoot(config), IonicStorageModule.forRoot()],
+  imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule, SocketIoModule.forRoot(config)],
   providers: [
     StatusBar,
     SplashScreen,
     Camera,
     Base64,
     ImagePicker,
-    GlobalService,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
   ],
   bootstrap: [AppComponent]

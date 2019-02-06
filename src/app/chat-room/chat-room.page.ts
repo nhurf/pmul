@@ -7,7 +7,6 @@ import { Camera, CameraOptions } from '@ionic-native/Camera/ngx';
 import { Base64 } from '@ionic-native/base64/ngx';
 import { ActionSheetController } from '@ionic/angular';
 import { ImagePicker } from '@ionic-native/image-picker/ngx';
-import { Storage } from '@ionic/storage';
 
 //  requires a peer of rxjs@* but none is installed. You must install peer dependencies yourself.
 //  requires a peer of @ionic-native/core@5.0.0 but none is installed. You must install peer dependencies yourself.
@@ -29,12 +28,11 @@ export class ChatRoomPage implements OnInit {
 
   constructor(private navCtrl: NavController, private route: ActivatedRoute,
     private socket: Socket, private toastCtrl: ToastController, private camera: Camera, private base64: Base64,
-    public actionSheetController: ActionSheetController, private imagePicker: ImagePicker,
-    private storage: Storage) {
-      this.storage.get('id').then((val) => {
-        this.myId = val;
-        console.log(this.myId);
-      });
+    public actionSheetController: ActionSheetController, private imagePicker: ImagePicker) {
+      //this.storage.get('id').then((val) => {
+        //this.myId = val;
+        //console.log(this.myId);
+      //});
     }
 
   sendtext() {
