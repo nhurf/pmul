@@ -32,10 +32,6 @@
     "@ionic-native/toast": "^5.0.0",
     "@ionic/angular": "^4.0.0",
     "@ionic/storage": "^2.2.0",
-<<<<<<< HEAD
-=======
-    "android-camera-permission": "^1.0.0",
->>>>>>> cb1fd8845eeb4d4c350d5df6b605b73bc028c2b7
     "com-badrit-base64": "0.2.0",
     "cordova-android": "7.1.4",
     "cordova-plugin-camera": "4.0.3",
