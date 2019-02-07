@@ -13,6 +13,8 @@ import { FileOpener } from '@ionic-native/file-opener/ngx';
 import { FilePath } from '@ionic-native/file-path/ngx';
 import { FileChooser } from '@ionic-native/file-chooser/ngx';
 import { MediaCapture, MediaFile, CaptureError, CaptureImageOptions } from '@ionic-native/media-capture/ngx';
+import { Base64 } from '@ionic-native/base64/ngx';
+import { dir } from 'async';
 
 declare var Peer: any;
 
@@ -51,7 +53,7 @@ export class ChatRoomPage implements OnInit {
     private socket: Socket, private toastCtrl: ToastController, private camera: Camera,
     public actionSheetController: ActionSheetController, private imagePicker: ImagePicker, public alertController: AlertController,
     private transfer: FileTransfer, private file: File, private fileOpener: FileOpener, private filePath: FilePath,
-    private fileChooser: FileChooser, private mediacapture: MediaCapture) { }
+    private fileChooser: FileChooser, private mediacapture: MediaCapture, private base64: Base64) { }
 
   ngOnInit() {
     this.nickname = this.route.snapshot.paramMap.get('nickname');
@@ -72,8 +74,7 @@ export class ChatRoomPage implements OnInit {
     });
 
     this.getData().subscribe(data => {
-      console.log('okdata');
-      console.log(data);
+      console.log('Recibido --> ' + data);
     });
 
     this.getMessages().subscribe(message => {
@@ -93,9 +94,9 @@ export class ChatRoomPage implements OnInit {
   createCall() {
     const options: CaptureImageOptions = {
       limit: 1
-     };
+    };
 
-     this.mediacapture.captureVideo(options)
+    this.mediacapture.captureVideo(options)
       .then(mediafile => {
         this.call = this.peer.call(this.otherId, mediafile);
       });
@@ -123,7 +124,6 @@ export class ChatRoomPage implements OnInit {
   getData() {
     const observable = new Observable(observer => {
       this.peer.on('data', (data) => {
-        console.log('okdata');
         observer.next(data);
       });
     });
@@ -218,16 +218,36 @@ export class ChatRoomPage implements OnInit {
   getFile() {
     this.fileChooser.open().then(file => {
       this.filePath.resolveNativePath(file).then(resolvedFilePath => {
-        this.fileOpener.open(resolvedFilePath, 'application/pdf').then(value => {
-          alert('It worked');
-        }).catch(err => {
-          alert(JSON.stringify(err));
-        });
+        const path = resolvedFilePath.substring(0, resolvedFilePath.lastIndexOf('/'));
+        file = resolvedFilePath.substring(resolvedFilePath.lastIndexOf('/') + 1, resolvedFilePath.length);
+        let file64;
+        this.file.readAsArrayBuffer(path, file).then(result => file64 = result);
+        const fileblob = this.b64toBlob(file64, '', 512);
+        this.conn.send(fileblob);
       }).catch(err => {
         alert(JSON.stringify(err));
       });
+    }).catch(err => {
+      alert(JSON.stringify(err));
     });
   }
+
+  b64toBlob(b64Data, contentType, sliceSize) {
+    contentType = contentType || '';
+    sliceSize = sliceSize || 512;
+    const byteCharacters = atob(b64Data);
+    const byteArrays = [];
+    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+      const slice = byteCharacters.slice(offset, offset + sliceSize);
+      const byteNumbers = new Array(slice.length);
+        for (let i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        byteArrays.push(byteArray);
+    }
+    return new Blob(byteArrays, {type: contentType});
+}
 
   async presentActionSheet() {
     const actionSheet = await this.actionSheetController.create({

@@ -19,6 +19,7 @@ import { FileOpener } from '@ionic-native/file-opener/ngx';
 import { FilePath } from '@ionic-native/file-path/ngx';
 import { FileChooser } from '@ionic-native/file-chooser/ngx';
 import { MediaCapture, MediaFile, CaptureError, CaptureImageOptions } from '@ionic-native/media-capture/ngx';
+import { File } from '@ionic-native/file/ngx';
 
 const config: SocketIoConfig = { url: 'http://95.179.148.127:3001', options: {} };
 
@@ -38,6 +39,7 @@ const config: SocketIoConfig = { url: 'http://95.179.148.127:3001', options: {} 
     FilePath,
     FileChooser,
     MediaCapture,
+    File,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
   ],
   bootstrap: [AppComponent]
