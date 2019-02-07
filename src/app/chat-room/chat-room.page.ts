@@ -29,6 +29,7 @@ export class ChatRoomPage implements OnInit {
   otherId = null;
   hasOtherId = false;
   conn = null;
+  client;
 
   constructor(private navCtrl: NavController, private route: ActivatedRoute,
     private socket: Socket, private toastCtrl: ToastController, private camera: Camera, private base64: Base64,
@@ -51,6 +52,7 @@ export class ChatRoomPage implements OnInit {
 
     this.getDataRTC().subscribe(data => {
       console.log(data);
+      this.client = data;
     });
 
     this.getrequestId().subscribe(data => {
@@ -91,11 +93,16 @@ export class ChatRoomPage implements OnInit {
   }
 
   sendMp2p() {
+    this.conn.on('data', function (data) {
+      console.log(data);
+      this.client.send('hi');
+    });
   }
 
   sendMessage() {
     this.socket.emit('add-message', { text: this.message, isImage: false });
     this.message = '';
+    this.sendMp2p();
   }
 
   sendImage(image: any) {
