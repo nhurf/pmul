@@ -7,6 +7,8 @@ import { Camera, CameraOptions } from '@ionic-native/Camera/ngx';
 import { Base64 } from '@ionic-native/base64/ngx';
 import { ActionSheetController } from '@ionic/angular';
 import { ImagePicker } from '@ionic-native/image-picker/ngx';
+import { GlobalService } from './../global.service';
+import { Storage } from '@ionic/storage';
 
 //  requires a peer of rxjs@* but none is installed. You must install peer dependencies yourself.
 //  requires a peer of @ionic-native/core@5.0.0 but none is installed. You must install peer dependencies yourself.
@@ -23,20 +25,21 @@ export class ChatRoomPage implements OnInit {
   nickname = '';
   message = '';
   room = '';
-  myId;
-  otherId;
+  myId = this.global.peer.id;
+  otherId = null;
+  hasOtherId = false;
+  conn = null;
 
   constructor(private navCtrl: NavController, private route: ActivatedRoute,
     private socket: Socket, private toastCtrl: ToastController, private camera: Camera, private base64: Base64,
-    public actionSheetController: ActionSheetController, private imagePicker: ImagePicker) {
-      //this.storage.get('id').then((val) => {
-        //this.myId = val;
-        //console.log(this.myId);
-      //});
+    public actionSheetController: ActionSheetController, private imagePicker: ImagePicker, private global: GlobalService,
+    private storage: Storage) {
+    while (!this.hasOtherId) {
+      if (this.otherId === null) {
+        this.hasOtherId = true;
+        this.socket.emit('needId');
+      }
     }
-
-  sendtext() {
-
   }
 
   ngOnInit() {
@@ -46,11 +49,19 @@ export class ChatRoomPage implements OnInit {
       this.messages.push(message);
     });
 
+    this.getrequestId().subscribe(data => {
+      this.socket.emit('myId', this.myId);
+    });
+
     this.getId().subscribe(data => {
       const d = data['id'];
       if (d !== this.myId) {
         this.otherId = d;
-        console.log('ID del otro ' + d);
+        console.log('ID del otro ' + this.otherId);
+        if (this.conn === null) {
+          this.conn = this.global.peer.connect(this.otherId);
+          this.sendMp2p();
+        }
       }
     });
 
@@ -65,17 +76,31 @@ export class ChatRoomPage implements OnInit {
   }
 
   createVideo() {
-
   }
 
   createCall() {
 
   }
 
+  getUserVideo() {
+
+  }
+
+  sendMp2p() {
+    this.conn.on('open', function () {
+      console.log('conexion abierta');
+      // Receive messages
+      this.conn.on('data', function (adata) {
+        console.log('Received', adata);
+      });
+      // Send messages
+      this.conn.send('Hello!');
+    });
+  }
+
   sendMessage() {
     this.socket.emit('add-message', { text: this.message, isImage: false });
     this.message = '';
-    this.sendtext();
   }
 
   sendImage(image: any) {
@@ -86,6 +111,15 @@ export class ChatRoomPage implements OnInit {
   getId() {
     const observable = new Observable(observer => {
       this.socket.on('id', (data) => {
+        observer.next(data);
+      });
+    });
+    return observable;
+  }
+
+  getrequestId() {
+    const observable = new Observable(observer => {
+      this.socket.on('requestId', (data) => {
         observer.next(data);
       });
     });
