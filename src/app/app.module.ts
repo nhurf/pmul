@@ -14,6 +14,11 @@ import { Base64 } from '@ionic-native/base64/ngx';
 import { ImagePicker } from '@ionic-native/image-picker/ngx';
 import { IonicStorageModule } from '@ionic/storage';
 import { GlobalService } from './global.service';
+import { FileTransfer, FileUploadOptions, FileTransferObject } from '@ionic-native/file-transfer/ngx';
+import { FileOpener } from '@ionic-native/file-opener/ngx';
+import { FilePath } from '@ionic-native/file-path/ngx';
+import { FileChooser } from '@ionic-native/file-chooser/ngx';
+import { MediaCapture, MediaFile, CaptureError, CaptureImageOptions } from '@ionic-native/media-capture/ngx';
 
 const config: SocketIoConfig = { url: 'http://95.179.148.127:3001', options: {} };
 
@@ -28,6 +33,11 @@ const config: SocketIoConfig = { url: 'http://95.179.148.127:3001', options: {} 
     Base64,
     ImagePicker,
     GlobalService,
+    FileTransfer,
+    FileOpener,
+    FilePath,
+    FileChooser,
+    MediaCapture,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
   ],
   bootstrap: [AppComponent]

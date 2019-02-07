@@ -4,11 +4,17 @@ import { Socket } from 'ng-socket-io';
 import { Observable } from 'rxjs/Observable';
 import { ActivatedRoute } from '@angular/router';
 import { Camera, CameraOptions } from '@ionic-native/Camera/ngx';
-import { Base64 } from '@ionic-native/base64/ngx';
 import { ActionSheetController } from '@ionic/angular';
 import { ImagePicker } from '@ionic-native/image-picker/ngx';
-import { GlobalService } from './../global.service';
-import { Storage } from '@ionic/storage';
+import { AlertController } from '@ionic/angular';
+import { FileTransfer, FileUploadOptions, FileTransferObject } from '@ionic-native/file-transfer/ngx';
+import { File } from '@ionic-native/file/ngx';
+import { FileOpener } from '@ionic-native/file-opener/ngx';
+import { FilePath } from '@ionic-native/file-path/ngx';
+import { FileChooser } from '@ionic-native/file-chooser/ngx';
+import { MediaCapture, MediaFile, CaptureError, CaptureImageOptions } from '@ionic-native/media-capture/ngx';
+
+declare var Peer: any;
 
 //  requires a peer of rxjs@* but none is installed. You must install peer dependencies yourself.
 //  requires a peer of @ionic-native/core@5.0.0 but none is installed. You must install peer dependencies yourself.
@@ -21,54 +27,57 @@ import { Storage } from '@ionic/storage';
 })
 export class ChatRoomPage implements OnInit {
 
+  peer = new Peer({
+    debug: 2,
+    key: 'lwjd5qra8257b9', config: {
+      'iceServers': [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'turn:numb.viagenie.ca', credential: 'muazkh', username: 'webrtc@live.com' }
+      ]
+    }
+  });
+
   messages = [];
   nickname = '';
   message = '';
   room = '';
-  myId = this.global.peer.id;
-  otherId = null;
-  hasOtherId = false;
-  conn = null;
-  client;
+  otherId = '';
+  myId;
+  conn;
+  allowUpload = false;
+  call;
 
   constructor(private navCtrl: NavController, private route: ActivatedRoute,
-    private socket: Socket, private toastCtrl: ToastController, private camera: Camera, private base64: Base64,
-    public actionSheetController: ActionSheetController, private imagePicker: ImagePicker, private global: GlobalService,
-    private storage: Storage) {
-    while (!this.hasOtherId) {
-      if (this.otherId === null) {
-        this.hasOtherId = true;
-        this.socket.emit('needId');
-      }
-    }
-  }
+    private socket: Socket, private toastCtrl: ToastController, private camera: Camera,
+    public actionSheetController: ActionSheetController, private imagePicker: ImagePicker, public alertController: AlertController,
+    private transfer: FileTransfer, private file: File, private fileOpener: FileOpener, private filePath: FilePath,
+    private fileChooser: FileChooser, private mediacapture: MediaCapture) { }
 
   ngOnInit() {
     this.nickname = this.route.snapshot.paramMap.get('nickname');
 
+    this.peer.on('open', (id) => {
+      setTimeout(() => {
+        this.myId = id;
+        console.log('ID is: ' + this.myId);
+      }, 1000);
+    });
+
+    this.getVideo().subscribe(call => { console.log(call); });
+
+    this.getRTC().subscribe(conn => {
+      console.log(conn);
+      this.conn = conn;
+      this.ready();
+    });
+
+    this.getData().subscribe(data => {
+      console.log('okdata');
+      console.log(data);
+    });
+
     this.getMessages().subscribe(message => {
       this.messages.push(message);
-    });
-
-    this.getDataRTC().subscribe(data => {
-      console.log(data);
-      this.client = data;
-    });
-
-    this.getrequestId().subscribe(data => {
-      this.socket.emit('myId', this.myId);
-    });
-
-    this.getId().subscribe(data => {
-      const d = data['id'];
-      if (d !== this.myId) {
-        this.otherId = d;
-        console.log('ID del otro ' + this.otherId);
-        if (this.conn === null) {
-          this.conn = this.global.peer.connect(this.otherId);
-          console.log(this.conn);
-        }
-      }
     });
 
     this.getUsers().subscribe(data => {
@@ -81,28 +90,23 @@ export class ChatRoomPage implements OnInit {
     });
   }
 
-  createVideo() {
-  }
-
   createCall() {
+    const options: CaptureImageOptions = {
+      limit: 1
+     };
 
-  }
-
-  getUserVideo() {
-
-  }
-
-  sendMp2p() {
-    this.conn.on('data', function (data) {
-      console.log(data);
-      this.client.send('hi');
-    });
+     this.mediacapture.captureVideo(options)
+      .then(mediafile => {
+        this.call = this.peer.call(this.otherId, mediafile);
+      });
   }
 
   sendMessage() {
     this.socket.emit('add-message', { text: this.message, isImage: false });
     this.message = '';
-    this.sendMp2p();
+    this.conn.send('gfgsgffg');
+
+    this.conn.send({ file: 'fddfs', filename: 'fddfs', filetype: 'fddfs' });
   }
 
   sendImage(image: any) {
@@ -110,32 +114,36 @@ export class ChatRoomPage implements OnInit {
     this.message = '';
   }
 
-  getDataRTC() {
-    const observable = new Observable(observer => {
-      this.global.peer.on('connection', function(data) {
-        observer.next(data);
-      });
+  ready() {
+    this.conn.on('data', (data) => {
+      console.log('data ' + data);
     });
-    return observable;
   }
 
   getData() {
-
-  }
-
-  getId() {
     const observable = new Observable(observer => {
-      this.socket.on('id', (data) => {
+      this.peer.on('data', (data) => {
+        console.log('okdata');
         observer.next(data);
       });
     });
     return observable;
   }
 
-  getrequestId() {
+  getRTC() {
     const observable = new Observable(observer => {
-      this.socket.on('requestId', (data) => {
-        observer.next(data);
+      this.peer.on('connection', (conn) => {
+        observer.next(conn);
+      });
+    });
+    return observable;
+  }
+
+  getVideo() {
+    const observable = new Observable(observer => {
+      this.peer.on('call', (call) => {
+        observer.next(call);
+        call.answer(navigator.getUserMedia);
       });
     });
     return observable;
@@ -208,7 +216,17 @@ export class ChatRoomPage implements OnInit {
   }
 
   getFile() {
-
+    this.fileChooser.open().then(file => {
+      this.filePath.resolveNativePath(file).then(resolvedFilePath => {
+        this.fileOpener.open(resolvedFilePath, 'application/pdf').then(value => {
+          alert('It worked');
+        }).catch(err => {
+          alert(JSON.stringify(err));
+        });
+      }).catch(err => {
+        alert(JSON.stringify(err));
+      });
+    });
   }
 
   async presentActionSheet() {
@@ -245,6 +263,55 @@ export class ChatRoomPage implements OnInit {
       }]
     });
     await actionSheet.present();
+  }
+
+  async noData() {
+    const alert = await this.alertController.create({
+      header: 'Faltan datos',
+      message: 'Si desea conectarse a un peer debe rellenar el segundo campo',
+      buttons: ['OK']
+    });
+
+    await alert.present();
+  }
+
+  async createPeer() {
+    const alert = await this.alertController.create({
+      header: 'Crear conexión WEBRTC',
+      inputs: [
+        {
+          id: 'myPeer',
+          value: 'Tu peer es ' + this.myId
+        },
+        {
+          id: 'otherId',
+          placeholder: 'Peer al que desea conectarse'
+        }
+      ],
+      buttons: [
+        {
+          text: 'Cancelar',
+          handler: () => {
+            console.log('Cancelar');
+          }
+        },
+        {
+          text: 'Conectarse a un peer',
+          handler: (data) => {
+            console.log(data[1]);
+            if (data[1] === '') {
+              this.noData();
+            } else {
+              this.otherId = data[1];
+              this.conn = this.peer.connect(data[1]);
+              console.log('Conexión creada');
+            }
+          }
+        }
+      ]
+    });
+
+    await alert.present();
   }
 
 }

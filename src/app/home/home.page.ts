@@ -2,8 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Socket } from 'ng-socket-io';
 import { NavController, ToastController } from '@ionic/angular';
 import { Observable } from 'rxjs/Observable';
-import { Storage } from '@ionic/storage';
-import { GlobalService } from './../global.service';
 
 @Component({
   selector: 'app-home',
@@ -14,17 +12,8 @@ export class HomePage implements OnInit {
 
   nickname = '';
   room = '';
-  myId;
 
-  constructor(public navCtrl: NavController, private socket: Socket, private toastCtrl: ToastController,
-    private storage: Storage, private global: GlobalService) {
-    this.global.createPeer();
-    setTimeout(() => {
-      this.storage.get('id').then((val) => {
-        this.myId = val;
-      });
-    }, 4000);
-  }
+  constructor(public navCtrl: NavController, private socket: Socket, private toastCtrl: ToastController) {}
 
   ngOnInit() {
     this.getLog().subscribe(data => {
@@ -48,7 +37,6 @@ export class HomePage implements OnInit {
     this.socket.connect();
     this.socket.emit('create', this.room);
     this.socket.emit('set-nickname', this.nickname);
-    this.socket.emit('myId', this.myId);
     this.navCtrl.navigateForward('/chat-room/' + this.nickname);
   }
 
