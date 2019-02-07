@@ -49,6 +49,10 @@ export class ChatRoomPage implements OnInit {
       this.messages.push(message);
     });
 
+    this.getDataRTC().subscribe(data => {
+      console.log(data);
+    });
+
     this.getrequestId().subscribe(data => {
       this.socket.emit('myId', this.myId);
     });
@@ -60,7 +64,7 @@ export class ChatRoomPage implements OnInit {
         console.log('ID del otro ' + this.otherId);
         if (this.conn === null) {
           this.conn = this.global.peer.connect(this.otherId);
-          this.sendMp2p();
+          console.log(this.conn);
         }
       }
     });
@@ -87,15 +91,6 @@ export class ChatRoomPage implements OnInit {
   }
 
   sendMp2p() {
-    this.conn.on('open', function () {
-      console.log('conexion abierta');
-      // Receive messages
-      this.conn.on('data', function (adata) {
-        console.log('Received', adata);
-      });
-      // Send messages
-      this.conn.send('Hello!');
-    });
   }
 
   sendMessage() {
@@ -106,6 +101,19 @@ export class ChatRoomPage implements OnInit {
   sendImage(image: any) {
     this.socket.emit('add-message', { text: image, isImage: true });
     this.message = '';
+  }
+
+  getDataRTC() {
+    const observable = new Observable(observer => {
+      this.global.peer.on('connection', function(data) {
+        observer.next(data);
+      });
+    });
+    return observable;
+  }
+
+  getData() {
+
   }
 
   getId() {
