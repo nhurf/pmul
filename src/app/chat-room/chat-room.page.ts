@@ -220,10 +220,17 @@ export class ChatRoomPage implements OnInit {
       this.filePath.resolveNativePath(file).then(resolvedFilePath => {
         const path = resolvedFilePath.substring(0, resolvedFilePath.lastIndexOf('/'));
         file = resolvedFilePath.substring(resolvedFilePath.lastIndexOf('/') + 1, resolvedFilePath.length);
+        const fpath = path + file;
         let file64;
+        this.file.readAsDataURL(path, file).then(result => file64 = result);
+        alert(file64);
+        this.base64.encodeFile(fpath).then(result => file64 = result);
+        alert(file64);
         this.file.readAsArrayBuffer(path, file).then(result => file64 = result);
+        alert(file64);
         const fileblob = this.b64toBlob(file64, '', 512);
-        this.conn.send(fileblob);
+        alert(fileblob);
+
       }).catch(err => {
         alert(JSON.stringify(err));
       });
