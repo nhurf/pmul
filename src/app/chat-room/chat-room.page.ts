@@ -14,7 +14,6 @@ import { FilePath } from '@ionic-native/file-path/ngx';
 import { FileChooser } from '@ionic-native/file-chooser/ngx';
 import { MediaCapture, MediaFile, CaptureError, CaptureImageOptions } from '@ionic-native/media-capture/ngx';
 import { Base64 } from '@ionic-native/base64/ngx';
-import { dir } from 'async';
 
 declare var Peer: any;
 
@@ -39,13 +38,16 @@ export class ChatRoomPage implements OnInit {
     }
   });
 
+  idFile = 0;
   messages = [];
+  files = [];
+  mimeType = [];
   nickname = '';
   message = '';
   room = '';
   otherId = '';
   myId;
-  conn;
+  conn = null;
   allowUpload = false;
   call;
 
@@ -68,13 +70,9 @@ export class ChatRoomPage implements OnInit {
     this.getVideo().subscribe(call => { console.log(call); });
 
     this.getRTC().subscribe(conn => {
-      console.log(conn);
       this.conn = conn;
-      this.ready();
-    });
-
-    this.getData().subscribe(data => {
-      console.log('Recibido --> ' + data);
+      console.log(conn);
+      this.getData();
     });
 
     this.getMessages().subscribe(message => {
@@ -103,31 +101,33 @@ export class ChatRoomPage implements OnInit {
   }
 
   sendMessage() {
-    this.socket.emit('add-message', { text: this.message, isImage: false });
+    this.socket.emit('add-message', { text: this.message, isImage: false, isFile: false, idFile: 'not' });
     this.message = '';
-    this.conn.send('gfgsgffg');
-
-    this.conn.send({ file: 'fddfs', filename: 'fddfs', filetype: 'fddfs' });
   }
 
   sendImage(image: any) {
-    this.socket.emit('add-message', { text: image, isImage: true });
+    this.socket.emit('add-message', { text: image, isImage: true, isFile: false, idFile: 'not' });
     this.message = '';
   }
 
-  ready() {
+  /** fileReady() {
+    // este metodo es llamado cuando el peer recibe el archivo, y lo guarda en su móvil (ruta fija @path)
+    // data1 es el nombre del archivo, mientras que data0 es el archivo
     this.conn.on('data', (data) => {
-      console.log('data ' + data);
+      const path = 'file:///storage/emulated/0/Download/';
+      this.file.writeFile(path, data[1], data[0]);
+      this.files.push(path + data[1]);
+      this.mimeType.push(data[2]);
     });
-  }
+  } */
 
-  getData() {
-    const observable = new Observable(observer => {
-      this.peer.on('data', (data) => {
-        observer.next(data);
-      });
-    });
-    return observable;
+  openFile(id: number) {
+    // metodo para abrir el archivo descargado
+    alert(this.files[id]);
+    alert(this.mimeType[id]);
+    this.fileOpener.open(this.files[id], this.mimeType[id])
+      .then(() => alert('File is opened'))
+      .catch(e => alert('Error opening file' + e));
   }
 
   getRTC() {
@@ -135,6 +135,24 @@ export class ChatRoomPage implements OnInit {
       this.peer.on('connection', (conn) => {
         observer.next(conn);
       });
+    });
+    return observable;
+  }
+
+  getData() {
+    const observable = new Observable(observer => {
+      this.conn.on('data', (data) => {
+        observer.next(data);
+      });
+    }).subscribe(data => {
+      const path = this.file.externalDataDirectory;
+      alert('Archivo recibido');
+      this.file.writeFile(path, data['nameFile'], data['file']);
+      alert(data['nameFile']);
+      alert(data['file']);
+      this.files.push(path + data[1]);
+      this.mimeType.push(data[2]);
+      this.idFile++;
     });
     return observable;
   }
@@ -216,45 +234,29 @@ export class ChatRoomPage implements OnInit {
   }
 
   getFile() {
+    let mimeType;
     this.fileChooser.open().then(file => {
       this.filePath.resolveNativePath(file).then(resolvedFilePath => {
-        const path = resolvedFilePath.substring(0, resolvedFilePath.lastIndexOf('/'));
-        file = resolvedFilePath.substring(resolvedFilePath.lastIndexOf('/') + 1, resolvedFilePath.length);
-        const fpath = path + file;
-        let file64;
-        this.file.readAsDataURL(path, file).then(result => file64 = result);
-        alert(file64);
-        this.base64.encodeFile(fpath).then(result => file64 = result);
-        alert(file64);
-        this.file.readAsArrayBuffer(path, file).then(result => file64 = result);
-        alert(file64);
-        const fileblob = this.b64toBlob(file64, '', 512);
-        alert(fileblob);
-
-      }).catch(err => {
-        alert(JSON.stringify(err));
+        const currentPath = resolvedFilePath.substring(0, resolvedFilePath.lastIndexOf('/') + 1);
+        const currentName = resolvedFilePath.substring(resolvedFilePath.lastIndexOf('/') + 1);
+        this.file.readAsDataURL(currentPath, currentName).then(value => {
+          mimeType = value.substring(value.indexOf(':') + 1, value.lastIndexOf(';'));
+          this.fileOpener.open(resolvedFilePath, mimeType).then(valuee => {
+            this.file.readAsArrayBuffer(currentPath, currentName).then((arrayFile: any) => {
+              this.conn.send({ file: arrayFile, nameFile: currentName, mimeType: mimeType });
+              this.socket.emit('add-message', { text: this.idFile + ' ' + currentName, isImage: false, isFile: true, idFile: this.idFile });
+              this.files.push(resolvedFilePath);
+              this.mimeType.push(mimeType);
+              alert('Archivo enviado');
+              this.idFile++;
+            }, (err) => {
+              alert(err);
+            });
+          });
+        });
       });
-    }).catch(err => {
-      alert(JSON.stringify(err));
     });
   }
-
-  b64toBlob(b64Data, contentType, sliceSize) {
-    contentType = contentType || '';
-    sliceSize = sliceSize || 512;
-    const byteCharacters = atob(b64Data);
-    const byteArrays = [];
-    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-      const slice = byteCharacters.slice(offset, offset + sliceSize);
-      const byteNumbers = new Array(slice.length);
-        for (let i = 0; i < slice.length; i++) {
-            byteNumbers[i] = slice.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-        byteArrays.push(byteArray);
-    }
-    return new Blob(byteArrays, {type: contentType});
-}
 
   async presentActionSheet() {
     const actionSheet = await this.actionSheetController.create({

@@ -35,9 +35,21 @@
             <div class="time">{{message.created | date:'dd.MM hh:MM'}}</div>
           </div>
           <ng-template #noImage>
-            <span class="user_name">{{ message.from }}:</span><br>
-            <span>{{ message.text }}</span><br>
-            <div class="time">{{message.created | date:'dd.MM hh:MM'}}</div>
+            <div *ngIf="message.isFile; else noFile">
+              <span class="user_name">{{ message.from }}:</span><br>
+              <ion-button clear (click)="openFile(message.idFile)">
+                <!-- El archivo se descarga automaticamente, al estar el peering abierto-->
+                <ion-icon name="download"></ion-icon>
+              </ion-button>
+              {{ message.text }}
+              <!-- El nombre del archivo -->
+              <div class="time">{{message.created | date:'dd.MM hh:MM'}}</div>
+            </div>
+            <ng-template #noFile>
+              <span class="user_name">{{ message.from }}:</span><br>
+              <span>{{ message.text }}</span><br>
+              <div class="time">{{message.created | date:'dd.MM hh:MM'}}</div>
+            </ng-template>
           </ng-template>
         </ion-col>
       </ng-template>
@@ -50,9 +62,21 @@
             <div class="time">{{message.created | date:'dd.MM hh:MM'}}</div>
           </div>
           <ng-template #noImage>
-            <span class="user_name">{{ message.from }}:</span><br>
-            <span>{{ message.text }}</span><br>
-            <div class="time">{{message.created | date:'dd.MM hh:MM'}}</div>
+            <div *ngIf="message.isFile; else noFile">
+              <span class="user_name">{{ message.from }}:</span><br>
+              <ion-button clear (click)="openFile(message.idFile)">
+                <!-- El archivo se descarga automaticamente, al estar el peering abierto-->
+                <ion-icon name="download"></ion-icon>
+              </ion-button>
+              {{ message.text }}
+              <!-- El nombre del archivo -->
+              <div class="time">{{message.created | date:'dd.MM hh:MM'}}</div>
+            </div>
+            <ng-template #noFile>
+              <span class="user_name">{{ message.from }}:</span><br>
+              <span>{{ message.text }}</span><br>
+              <div class="time">{{message.created | date:'dd.MM hh:MM'}}</div>
+            </ng-template>
           </ng-template>
         </ion-col>
       </ng-template>
