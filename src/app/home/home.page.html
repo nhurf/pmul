@@ -11,12 +11,13 @@
     <ion-label position="stacked">Introduzca un nick</ion-label>
     <ion-input type="text" [(ngModel)]="nickname" placeholder="Nickname"></ion-input>
   </ion-item>
+  <!--
   <ion-item>
     <ion-label position="stacked">Introduzca una ID</ion-label>
     <ion-input type="text" [(ngModel)]="room" placeholder="idRoom"></ion-input>
   </ion-item>
-
+  -->
   <br />
-
-  <div text-center><ion-button expand="block" (click)="joinChat()" [disabled]="nickname === '' || room === ''">Crear o unirse a la sala</ion-button></div>
+  <!--<div text-center><ion-button expand="block" (click)="joinChat()" [disabled]="nickname === '' || room === ''">Crear o unirse a la sala</ion-button></div>-->
+  <div text-center><ion-button expand="block" (click)="joinChat()" [disabled]="nickname === ''">Unirse a la sala</ion-button></div>
 </ion-content>

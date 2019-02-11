@@ -148,10 +148,8 @@ export class ChatRoomPage implements OnInit {
       const path = this.file.externalDataDirectory;
       alert('Archivo recibido');
       this.file.writeFile(path, data['nameFile'], data['file']);
-      alert(data['nameFile']);
-      alert(data['file']);
-      this.files.push(path + data[1]);
-      this.mimeType.push(data[2]);
+      this.files.push(path + data['nameFile']);
+      this.mimeType.push(data['mimeType']);
       this.idFile++;
     });
     return observable;
@@ -247,7 +245,6 @@ export class ChatRoomPage implements OnInit {
               this.socket.emit('add-message', { text: this.idFile + ' ' + currentName, isImage: false, isFile: true, idFile: this.idFile });
               this.files.push(resolvedFilePath);
               this.mimeType.push(mimeType);
-              alert('Archivo enviado');
               this.idFile++;
             }, (err) => {
               alert(err);
