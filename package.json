@@ -32,6 +32,7 @@
     "@ionic-native/file-path": "^5.0.0",
     "@ionic-native/file-transfer": "^5.0.0",
     "@ionic-native/image-picker": "^5.0.0",
+    "@ionic-native/ionic-webview": "^5.0.0",
     "@ionic-native/media-capture": "^5.0.0",
     "@ionic-native/native-audio": "^5.0.0",
     "@ionic-native/splash-screen": "^5.0.0",
@@ -112,9 +113,7 @@
       "cordova-plugin-statusbar": {},
       "cordova-plugin-device": {},
       "cordova-plugin-splashscreen": {},
-      "cordova-plugin-ionic-webview": {
-        "ANDROID_SUPPORT_ANNOTATIONS_VERSION": "27.+"
-      },
+      "cordova-plugin-ionic-webview": {},
       "cordova-plugin-ionic-keyboard": {},
       "com-badrit-base64": {},
       "cordova-plugin-nativeaudio": {},

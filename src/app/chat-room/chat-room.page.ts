@@ -14,7 +14,6 @@ import { FilePath } from '@ionic-native/file-path/ngx';
 import { FileChooser } from '@ionic-native/file-chooser/ngx';
 import { MediaCapture, MediaFile, CaptureError, CaptureImageOptions } from '@ionic-native/media-capture/ngx';
 import { Base64 } from '@ionic-native/base64/ngx';
-import { StreamingMedia, StreamingVideoOptions} from '@ionic-native/streaming-media/ngx'
 import { Clipboard } from '@ionic-native/clipboard/ngx';
 
 declare var Peer: any;
@@ -51,27 +50,13 @@ export class ChatRoomPage implements OnInit {
   myId;
   conn = null;
   allowUpload = false;
-  call;
-
-  constraints = {
-    video: true,
-    audio: false
-  };
-  
-  options: StreamingVideoOptions = {
-    successCallback: () => { alert('video play')},
-    errorCallback: (e) => { alert(e)},
-    orientation: 'landscape',
-    shouldAutoClose: true,
-    controls: true
-  }
 
   constructor(private navCtrl: NavController, private route: ActivatedRoute,
     private socket: Socket, private toastCtrl: ToastController, private camera: Camera,
     public actionSheetController: ActionSheetController, private imagePicker: ImagePicker, public alertController: AlertController,
     private transfer: FileTransfer, private file: File, private fileOpener: FileOpener, private filePath: FilePath,
     private fileChooser: FileChooser, private mediacapture: MediaCapture, private base64: Base64,
-    private streamingMedia: StreamingMedia, private clipboard: Clipboard) { }
+    private clipboard: Clipboard) { }
 
   ngOnInit() {
     this.nickname = this.route.snapshot.paramMap.get('nickname');
@@ -103,15 +88,45 @@ export class ChatRoomPage implements OnInit {
     });
   }
 
-  createCall() {
-    const options: CaptureImageOptions = {
-      limit: 1
-    };
+  b64toBlob(b64Data, contentType) {
+    contentType = contentType || '';
+    const sliceSize = 512;
 
-    this.mediacapture.captureVideo(options)
-      .then(mediafile => {
-        this.call = this.peer.call(this.otherId, mediafile);
-      });
+    const byteCharacters = atob(b64Data);
+    const byteArrays = [];
+
+    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+      const slice = byteCharacters.slice(offset, offset + sliceSize);
+
+      const byteNumbers = new Array(slice.length);
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+
+      const byteArray = new Uint8Array(byteNumbers);
+
+      byteArrays.push(byteArray);
+    }
+
+    const blob = new Blob(byteArrays, { type: contentType });
+    return blob;
+  }
+
+  savebase64AsImageFile(path, fileName, content) {
+    const DataBlob = this.b64toBlob(content, 'image/jpeg');
+    this.file.writeFile(path, fileName, DataBlob);
+
+    return true;
+  }
+
+  openImage(image) {
+    const path = this.file.externalCacheDirectory;
+    const fileName = 'imagenTemp.jpg';
+    alert(path);
+
+    if (this.savebase64AsImageFile(path, fileName, image).valueOf()) {
+      this.fileOpener.open(path + fileName, 'image/jpeg');
+    }
   }
 
   sendMessage() {
@@ -123,17 +138,6 @@ export class ChatRoomPage implements OnInit {
     this.socket.emit('add-message', { text: image, isImage: true, isFile: false, idFile: 'not' });
     this.message = '';
   }
-
-  /** fileReady() {
-    // este metodo es llamado cuando el peer recibe el archivo, y lo guarda en su móvil (ruta fija @path)
-    // data1 es el nombre del archivo, mientras que data0 es el archivo
-    this.conn.on('data', (data) => {
-      const path = 'file:///storage/emulated/0/Download/';
-      this.file.writeFile(path, data[1], data[0]);
-      this.files.push(path + data[1]);
-      this.mimeType.push(data[2]);
-    });
-  } */
 
   openFile(id: number) {
     // metodo para abrir el archivo descargado
@@ -165,21 +169,6 @@ export class ChatRoomPage implements OnInit {
       this.files.push(path + data['nameFile']);
       this.mimeType.push(data['mimeType']);
       this.idFile++;
-    });
-    return observable;
-  }
-
-  getVideo() {
-    const observable = new Observable(observer => {
-      this.conn.on('call', (call) => {
-        observer.next(call);
-      });
-    }).subscribe(call => {
-      this.call = call;
-      this.call.answer(navigator.mediaDevices.getUserMedia(this.constraints));
-      this.call.on('stream', stream => {
-        this.streamingMedia.playVideo(stream, this.options);
-      });
     });
     return observable;
   }
@@ -274,49 +263,6 @@ export class ChatRoomPage implements OnInit {
     });
   }
 
-  async createVideo() {
-    const alert = await this.alertController.create({
-      header: 'Crear videollamada WEBRTC',
-      inputs: [
-        {
-          id: 'myPeer',
-          value: 'Tu peer es ' + this.myId
-        },
-        {
-          id: 'otherId',
-          placeholder: 'Peer al que desea conectarse'
-        }
-      ],
-      buttons: [
-        {
-          text: 'Cancelar',
-          handler: () => {
-            console.log('Cancelar');
-          }
-        },
-        {
-          text: 'Conectarse a un peer',
-          handler: (data) => {
-            console.log(data[1]);
-            if (data[1] === '') {
-              this.noData();
-            } else {
-              
-              this.otherId = data[1];
-              this.call = this.peer.call(data[1], navigator.getUserMedia(this.constraints));
-              this.call.on('stream', stream => {
-                this.streamingMedia.playVideo(stream, this.options);
-              });
-            }
-          }
-        }
-      ]
-    });
-
-    await alert.present();
-
-  }
-
   async presentActionSheet() {
     const actionSheet = await this.actionSheetController.create({
       header: 'Enviar un archivo',
@@ -402,7 +348,7 @@ export class ChatRoomPage implements OnInit {
     await alert.present();
   }
 
-  pressText(text:string) {
+  pressText(text: string) {
     this.clipboard.copy(text);
   }
 

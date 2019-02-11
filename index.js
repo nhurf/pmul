@@ -1,8 +1,6 @@
 let app = require('express')();
 let http = require('http').Server(app);
 let io = require('socket.io')(http);
-var p2p = require('socket.io-p2p-server').Server;
-io.use(p2p);
 
 io.on('connection', (socket) => {
 
