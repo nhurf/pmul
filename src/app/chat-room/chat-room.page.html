@@ -10,7 +10,7 @@
         </ion-button>
       </ion-col>
       <ion-col size="2">
-        <ion-button clear (click)="createCall()">
+        <ion-button clear (click)="createVideo()">
           <ion-icon name="videocam"></ion-icon>
         </ion-button>
       </ion-col>
@@ -45,7 +45,7 @@
               <!-- El nombre del archivo -->
               <div class="time">{{message.created | date:'dd.MM hh:MM'}}</div>
             </div>
-            <ng-template #noFile>
+            <ng-template #noFile ng-click="pressText(message.text)">
               <span class="user_name">{{ message.from }}:</span><br>
               <span>{{ message.text }}</span><br>
               <div class="time">{{message.created | date:'dd.MM hh:MM'}}</div>
@@ -72,7 +72,7 @@
               <!-- El nombre del archivo -->
               <div class="time">{{message.created | date:'dd.MM hh:MM'}}</div>
             </div>
-            <ng-template #noFile>
+            <ng-template #noFile ng-click="pressText(message.text)">
               <span class="user_name">{{ message.from }}:</span><br>
               <span>{{ message.text }}</span><br>
               <div class="time">{{message.created | date:'dd.MM hh:MM'}}</div>

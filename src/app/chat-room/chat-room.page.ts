@@ -14,6 +14,8 @@ import { FilePath } from '@ionic-native/file-path/ngx';
 import { FileChooser } from '@ionic-native/file-chooser/ngx';
 import { MediaCapture, MediaFile, CaptureError, CaptureImageOptions } from '@ionic-native/media-capture/ngx';
 import { Base64 } from '@ionic-native/base64/ngx';
+import { StreamingMedia, StreamingVideoOptions} from '@ionic-native/streaming-media/ngx'
+import { Clipboard } from '@ionic-native/clipboard/ngx';
 
 declare var Peer: any;
 
@@ -51,11 +53,25 @@ export class ChatRoomPage implements OnInit {
   allowUpload = false;
   call;
 
+  constraints = {
+    video: true,
+    audio: false
+  };
+  
+  options: StreamingVideoOptions = {
+    successCallback: () => { alert('video play')},
+    errorCallback: (e) => { alert(e)},
+    orientation: 'landscape',
+    shouldAutoClose: true,
+    controls: true
+  }
+
   constructor(private navCtrl: NavController, private route: ActivatedRoute,
     private socket: Socket, private toastCtrl: ToastController, private camera: Camera,
     public actionSheetController: ActionSheetController, private imagePicker: ImagePicker, public alertController: AlertController,
     private transfer: FileTransfer, private file: File, private fileOpener: FileOpener, private filePath: FilePath,
-    private fileChooser: FileChooser, private mediacapture: MediaCapture, private base64: Base64) { }
+    private fileChooser: FileChooser, private mediacapture: MediaCapture, private base64: Base64,
+    private streamingMedia: StreamingMedia, private clipboard: Clipboard) { }
 
   ngOnInit() {
     this.nickname = this.route.snapshot.paramMap.get('nickname');
@@ -66,8 +82,6 @@ export class ChatRoomPage implements OnInit {
         console.log('ID is: ' + this.myId);
       }, 1000);
     });
-
-    this.getVideo().subscribe(call => { console.log(call); });
 
     this.getRTC().subscribe(conn => {
       this.conn = conn;
@@ -157,9 +171,14 @@ export class ChatRoomPage implements OnInit {
 
   getVideo() {
     const observable = new Observable(observer => {
-      this.peer.on('call', (call) => {
+      this.conn.on('call', (call) => {
         observer.next(call);
-        call.answer(navigator.getUserMedia);
+      });
+    }).subscribe(call => {
+      this.call = call;
+      this.call.answer(navigator.mediaDevices.getUserMedia(this.constraints));
+      this.call.on('stream', stream => {
+        this.streamingMedia.playVideo(stream, this.options);
       });
     });
     return observable;
@@ -255,6 +274,49 @@ export class ChatRoomPage implements OnInit {
     });
   }
 
+  async createVideo() {
+    const alert = await this.alertController.create({
+      header: 'Crear videollamada WEBRTC',
+      inputs: [
+        {
+          id: 'myPeer',
+          value: 'Tu peer es ' + this.myId
+        },
+        {
+          id: 'otherId',
+          placeholder: 'Peer al que desea conectarse'
+        }
+      ],
+      buttons: [
+        {
+          text: 'Cancelar',
+          handler: () => {
+            console.log('Cancelar');
+          }
+        },
+        {
+          text: 'Conectarse a un peer',
+          handler: (data) => {
+            console.log(data[1]);
+            if (data[1] === '') {
+              this.noData();
+            } else {
+              
+              this.otherId = data[1];
+              this.call = this.peer.call(data[1], navigator.getUserMedia(this.constraints));
+              this.call.on('stream', stream => {
+                this.streamingMedia.playVideo(stream, this.options);
+              });
+            }
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+
+  }
+
   async presentActionSheet() {
     const actionSheet = await this.actionSheetController.create({
       header: 'Enviar un archivo',
@@ -338,6 +400,10 @@ export class ChatRoomPage implements OnInit {
     });
 
     await alert.present();
+  }
+
+  pressText(text:string) {
+    this.clipboard.copy(text);
   }
 
 }

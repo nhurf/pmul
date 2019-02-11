@@ -21,8 +21,10 @@
     "@angular/platform-browser": "^7.2.2",
     "@angular/platform-browser-dynamic": "^7.2.2",
     "@angular/router": "^7.2.2",
+    "@ionic-native/android-permissions": "^5.0.0",
     "@ionic-native/base64": "^5.0.0",
     "@ionic-native/camera": "^5.0.0",
+    "@ionic-native/clipboard": "^5.0.0",
     "@ionic-native/core": "^5.0.0",
     "@ionic-native/file": "^5.0.0",
     "@ionic-native/file-chooser": "^5.0.0",
@@ -41,6 +43,8 @@
     "android-camera-permission": "^1.0.0",
     "com-badrit-base64": "^0.2.0",
     "cordova-android": "7.1.1",
+    "cordova-clipboard": "1.2.1",
+    "cordova-plugin-android-permissions": "1.0.0",
     "cordova-plugin-camera": "^4.0.3",
     "cordova-plugin-compat": "^1.2.0",
     "cordova-plugin-device": "^2.0.2",
@@ -123,7 +127,9 @@
       },
       "cordova-plugin-filepath": {},
       "cordova-plugin-filechooser": {},
-      "cordova-plugin-media-capture": {}
+      "cordova-plugin-media-capture": {},
+      "cordova-plugin-android-permissions": {},
+      "cordova-clipboard": {}
     },
     "platforms": [
       "android"
