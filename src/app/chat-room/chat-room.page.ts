@@ -256,7 +256,8 @@ export class ChatRoomPage implements OnInit {
           this.fileOpener.open(resolvedFilePath, mimeType).then(valuee => {
             this.file.readAsArrayBuffer(currentPath, currentName).then((arrayFile: any) => {
               this.conn.send({ file: arrayFile, nameFile: currentName, mimeType: mimeType });
-              this.socket.emit('add-message', { text: this.idFile + ' ' + currentName, isImage: false, isFile: true, idFile: this.idFile });
+              this.socket.emit('add-message', { room: this.room, text: this.idFile + ' ' + currentName,
+               isImage: false, isFile: true, idFile: this.idFile });
               this.files.push(resolvedFilePath);
               this.mimeType.push(mimeType);
               this.idFile++;
