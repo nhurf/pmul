@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Socket } from 'ng-socket-io';
 import { NavController, ToastController } from '@ionic/angular';
 import { Observable } from 'rxjs/Observable';
+import { Storage } from '@ionic/storage';
 
 @Component({
   selector: 'app-home',
@@ -13,7 +14,8 @@ export class HomePage implements OnInit {
   nickname = '';
   room = '';
 
-  constructor(public navCtrl: NavController, private socket: Socket, private toastCtrl: ToastController) {}
+  constructor(public navCtrl: NavController, private socket: Socket, private toastCtrl: ToastController,
+    private storage: Storage) {}
 
   ngOnInit() {
     this.getLog().subscribe(data => {
@@ -36,8 +38,10 @@ export class HomePage implements OnInit {
   joinChat() {
     this.socket.connect();
     this.socket.emit('create', this.room);
-    this.socket.emit('set-nickname', this.nickname);
+    this.socket.emit('set-nickname', { nick: this.nickname, room: this.room} );
     this.navCtrl.navigateForward('/chat-room/' + this.nickname);
+    this.storage.clear();
+    this.storage.set('room', this.room);
   }
 
   getLog() {

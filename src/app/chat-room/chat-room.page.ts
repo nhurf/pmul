@@ -15,6 +15,7 @@ import { FileChooser } from '@ionic-native/file-chooser/ngx';
 import { MediaCapture, MediaFile, CaptureError, CaptureImageOptions } from '@ionic-native/media-capture/ngx';
 import { Base64 } from '@ionic-native/base64/ngx';
 import { Clipboard } from '@ionic-native/clipboard/ngx';
+import { Storage } from '@ionic/storage';
 
 declare var Peer: any;
 
@@ -56,9 +57,13 @@ export class ChatRoomPage implements OnInit {
     public actionSheetController: ActionSheetController, private imagePicker: ImagePicker, public alertController: AlertController,
     private transfer: FileTransfer, private file: File, private fileOpener: FileOpener, private filePath: FilePath,
     private fileChooser: FileChooser, private mediacapture: MediaCapture, private base64: Base64,
-    private clipboard: Clipboard) { }
+    private clipboard: Clipboard, private storage: Storage) { console.log(this.socket); }
 
   ngOnInit() {
+    this.storage.get('room').then((val => {
+      this.room = val;
+    })
+    );
     this.nickname = this.route.snapshot.paramMap.get('nickname');
 
     this.peer.on('open', (id) => {
@@ -120,6 +125,7 @@ export class ChatRoomPage implements OnInit {
   }
 
   openImage(image) {
+    alert (image);
     const path = this.file.externalCacheDirectory;
     const fileName = 'imagenTemp.jpg';
     alert(path);
@@ -130,12 +136,12 @@ export class ChatRoomPage implements OnInit {
   }
 
   sendMessage() {
-    this.socket.emit('add-message', { text: this.message, isImage: false, isFile: false, idFile: 'not' });
+    this.socket.emit('add-message', { room: this.room, text: this.message, isImage: false, isFile: false, idFile: 'not' });
     this.message = '';
   }
 
   sendImage(image: any) {
-    this.socket.emit('add-message', { text: image, isImage: true, isFile: false, idFile: 'not' });
+    this.socket.emit('add-message', { room: this.room, text: image, isImage: true, isFile: false, idFile: 'not' });
     this.message = '';
   }
 
@@ -144,7 +150,7 @@ export class ChatRoomPage implements OnInit {
     alert(this.files[id]);
     alert(this.mimeType[id]);
     this.fileOpener.open(this.files[id], this.mimeType[id])
-      .then(() => alert('File is opened'))
+      .then(() => console.log('File is opened'))
       .catch(e => alert('Error opening file' + e));
   }
 
@@ -198,7 +204,7 @@ export class ChatRoomPage implements OnInit {
   async showToast(msg) {
     const toast = await this.toastCtrl.create({
       message: msg,
-      duration: 2000
+      duration: 1500
     });
 
     toast.present();
@@ -330,6 +336,12 @@ export class ChatRoomPage implements OnInit {
           }
         },
         {
+          text: 'Compartir peer',
+          handler: () => {
+            this.socket.emit('add-message', { room: this.room, text: this.myId, isImage: false, isFile: false, idFile: 'not' });
+          }
+        },
+        {
           text: 'Conectarse a un peer',
           handler: (data) => {
             console.log(data[1]);
@@ -348,7 +360,9 @@ export class ChatRoomPage implements OnInit {
     await alert.present();
   }
 
-  pressText(text: string) {
+  pressText(text) {
+    this.clipboard.clear();
+    alert(text);
     this.clipboard.copy(text);
   }
 

@@ -22,7 +22,8 @@ import { MediaCapture, MediaFile, CaptureError, CaptureImageOptions } from '@ion
 import { File } from '@ionic-native/file/ngx';
 import { Clipboard } from '@ionic-native/clipboard/ngx';
 
-const config: SocketIoConfig = { url: 'http://95.179.148.127:3001', options: {} };
+/// 95.179.148.127
+const config: SocketIoConfig = { url: 'http://46.183.115.170:3001', options: {} };
 
 @NgModule({
   declarations: [AppComponent],
