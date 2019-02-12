@@ -67,6 +67,7 @@
     "cordova-sqlite-storage": "^3.0.0",
     "core-js": "^2.5.4",
     "express": "^4.16.4",
+    "ionic-img-viewer": "^2.9.0",
     "ng-socket-io": "^0.2.4",
     "peerjs": "^0.3.20",
     "rxjs": "~6.3.3",

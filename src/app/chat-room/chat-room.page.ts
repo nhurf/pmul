@@ -57,13 +57,13 @@ export class ChatRoomPage implements OnInit {
     public actionSheetController: ActionSheetController, private imagePicker: ImagePicker, public alertController: AlertController,
     private transfer: FileTransfer, private file: File, private fileOpener: FileOpener, private filePath: FilePath,
     private fileChooser: FileChooser, private mediacapture: MediaCapture, private base64: Base64,
-    private clipboard: Clipboard, private storage: Storage) { console.log(this.socket); }
+    private clipboard: Clipboard, private storage: Storage) {
+      this.storage.get('room').then((val => {
+        this.room = val;
+      }));
+      console.log(this.socket); }
 
   ngOnInit() {
-    this.storage.get('room').then((val => {
-      this.room = val;
-    })
-    );
     this.nickname = this.route.snapshot.paramMap.get('nickname');
 
     this.peer.on('open', (id) => {
@@ -114,25 +114,17 @@ export class ChatRoomPage implements OnInit {
     }
 
     const blob = new Blob(byteArrays, { type: contentType });
+    alert (blob);
     return blob;
   }
-
-  savebase64AsImageFile(path, fileName, content) {
-    const DataBlob = this.b64toBlob(content, 'image/jpeg');
-    this.file.writeFile(path, fileName, DataBlob);
-
-    return true;
-  }
-
+  
   openImage(image) {
-    alert (image);
     const path = this.file.externalCacheDirectory;
     const fileName = 'imagenTemp.jpg';
-    alert(path);
 
-    if (this.savebase64AsImageFile(path, fileName, image).valueOf()) {
-      this.fileOpener.open(path + fileName, 'image/jpeg');
-    }
+    const DataBlob = this.b64toBlob(image, 'image/jpeg');
+    this.file.writeFile(path, fileName, DataBlob);
+    this.fileOpener.open(path + fileName, 'image/jpeg');
   }
 
   sendMessage() {

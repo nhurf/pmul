@@ -15,7 +15,7 @@ export class HomePage implements OnInit {
   room = '';
 
   constructor(public navCtrl: NavController, private socket: Socket, private toastCtrl: ToastController,
-    private storage: Storage) {}
+    private storage: Storage) { this.storage.clear(); }
 
   ngOnInit() {
     this.getLog().subscribe(data => {
@@ -40,7 +40,6 @@ export class HomePage implements OnInit {
     this.socket.emit('create', this.room);
     this.socket.emit('set-nickname', { nick: this.nickname, room: this.room} );
     this.navCtrl.navigateForward('/chat-room/' + this.nickname);
-    this.storage.clear();
     this.storage.set('room', this.room);
   }
 
