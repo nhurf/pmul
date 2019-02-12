@@ -1,19 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { NavController, ToastController } from '@ionic/angular';
 import { Socket } from 'ng-socket-io';
 import { Observable } from 'rxjs/Observable';
 import { ActivatedRoute } from '@angular/router';
 import { Camera, CameraOptions } from '@ionic-native/Camera/ngx';
 import { ActionSheetController } from '@ionic/angular';
-import { ImagePicker } from '@ionic-native/image-picker/ngx';
 import { AlertController } from '@ionic/angular';
-import { FileTransfer, FileUploadOptions, FileTransferObject } from '@ionic-native/file-transfer/ngx';
 import { File } from '@ionic-native/file/ngx';
 import { FileOpener } from '@ionic-native/file-opener/ngx';
 import { FilePath } from '@ionic-native/file-path/ngx';
 import { FileChooser } from '@ionic-native/file-chooser/ngx';
-import { MediaCapture, MediaFile, CaptureError, CaptureImageOptions } from '@ionic-native/media-capture/ngx';
-import { Base64 } from '@ionic-native/base64/ngx';
 import { Clipboard } from '@ionic-native/clipboard/ngx';
 import { Storage } from '@ionic/storage';
 
@@ -51,17 +47,18 @@ export class ChatRoomPage implements OnInit {
   myId;
   conn = null;
   allowUpload = false;
+  @ViewChild('content') content;
 
   constructor(private navCtrl: NavController, private route: ActivatedRoute,
     private socket: Socket, private toastCtrl: ToastController, private camera: Camera,
-    public actionSheetController: ActionSheetController, private imagePicker: ImagePicker, public alertController: AlertController,
-    private transfer: FileTransfer, private file: File, private fileOpener: FileOpener, private filePath: FilePath,
-    private fileChooser: FileChooser, private mediacapture: MediaCapture, private base64: Base64,
-    private clipboard: Clipboard, private storage: Storage) {
-      this.storage.get('room').then((val => {
-        this.room = val;
-      }));
-      console.log(this.socket); }
+    public actionSheetController: ActionSheetController, public alertController: AlertController,
+    private file: File, private fileOpener: FileOpener, private filePath: FilePath,
+    private fileChooser: FileChooser, private clipboard: Clipboard, private storage: Storage) {
+    this.storage.get('room').then((val => {
+      this.room = val;
+    }));
+    console.log(this.socket);
+  }
 
   ngOnInit() {
     this.nickname = this.route.snapshot.paramMap.get('nickname');
@@ -81,50 +78,17 @@ export class ChatRoomPage implements OnInit {
 
     this.getMessages().subscribe(message => {
       this.messages.push(message);
+      this.content.scrollToBottom();
     });
 
     this.getUsers().subscribe(data => {
       const user = data['user'];
       if (data['event'] === 'left') {
-        this.showToast('User left: ' + user);
+        this.showToast(user + ' ha dejado el chat');
       } else {
-        this.showToast('User joined: ' + user);
+        this.showToast(user + ' se ha unido al chat');
       }
     });
-  }
-
-  b64toBlob(b64Data, contentType) {
-    contentType = contentType || '';
-    const sliceSize = 512;
-
-    const byteCharacters = atob(b64Data);
-    const byteArrays = [];
-
-    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-      const slice = byteCharacters.slice(offset, offset + sliceSize);
-
-      const byteNumbers = new Array(slice.length);
-      for (let i = 0; i < slice.length; i++) {
-        byteNumbers[i] = slice.charCodeAt(i);
-      }
-
-      const byteArray = new Uint8Array(byteNumbers);
-
-      byteArrays.push(byteArray);
-    }
-
-    const blob = new Blob(byteArrays, { type: contentType });
-    alert (blob);
-    return blob;
-  }
-  
-  openImage(image) {
-    const path = this.file.externalCacheDirectory;
-    const fileName = 'imagenTemp.jpg';
-
-    const DataBlob = this.b64toBlob(image, 'image/jpeg');
-    this.file.writeFile(path, fileName, DataBlob);
-    this.fileOpener.open(path + fileName, 'image/jpeg');
   }
 
   sendMessage() {
@@ -143,7 +107,7 @@ export class ChatRoomPage implements OnInit {
     alert(this.mimeType[id]);
     this.fileOpener.open(this.files[id], this.mimeType[id])
       .then(() => console.log('File is opened'))
-      .catch(e => alert('Error opening file' + e));
+      .catch(e => alert('Error al abrir el archivo' + e));
   }
 
   getRTC() {
@@ -156,13 +120,15 @@ export class ChatRoomPage implements OnInit {
   }
 
   getData() {
+    this.allowUpload = true;
+    alert('Un usuario se ha conectado a ti');
     const observable = new Observable(observer => {
       this.conn.on('data', (data) => {
         observer.next(data);
       });
     }).subscribe(data => {
       const path = this.file.externalDataDirectory;
-      alert('Archivo recibido');
+      alert('Se ha recibido un archivo');
       this.file.writeFile(path, data['nameFile'], data['file']);
       this.files.push(path + data['nameFile']);
       this.mimeType.push(data['mimeType']);
@@ -248,8 +214,10 @@ export class ChatRoomPage implements OnInit {
           this.fileOpener.open(resolvedFilePath, mimeType).then(valuee => {
             this.file.readAsArrayBuffer(currentPath, currentName).then((arrayFile: any) => {
               this.conn.send({ file: arrayFile, nameFile: currentName, mimeType: mimeType });
-              this.socket.emit('add-message', { room: this.room, text: this.idFile + ' ' + currentName,
-               isImage: false, isFile: true, idFile: this.idFile });
+              this.socket.emit('add-message', {
+                room: this.room, text: this.idFile + ' ' + currentName,
+                isImage: false, isFile: true, idFile: this.idFile
+              });
               this.files.push(resolvedFilePath);
               this.mimeType.push(mimeType);
               this.idFile++;
@@ -283,7 +251,11 @@ export class ChatRoomPage implements OnInit {
         text: 'Archivos',
         icon: 'document',
         handler: () => {
-          this.getFile();
+          if (this.allowUpload) {
+            this.getFile();
+          } else {
+            alert('Debe conectarse con un peer');
+          }
           console.log('Play clicked');
         }
       }, {
@@ -343,6 +315,7 @@ export class ChatRoomPage implements OnInit {
             } else {
               this.otherId = data[1];
               this.conn = this.peer.connect(data[1]);
+              this.allowUpload = true;
               console.log('Conexión creada');
             }
           }
@@ -353,10 +326,27 @@ export class ChatRoomPage implements OnInit {
     await alert.present();
   }
 
-  pressText(text) {
+  async pressText(text) {
     this.clipboard.clear();
-    alert(text);
-    this.clipboard.copy(text);
+
+    const actionSheet = await this.actionSheetController.create({
+      header: 'Copiar texto',
+      buttons: [{
+        text: 'Copiar texto',
+        icon: 'text',
+        handler: () => {
+          this.clipboard.copy(text);
+        }
+      }, {
+        text: 'Cancelar',
+        icon: 'close',
+        role: 'cancel',
+        handler: () => {
+          console.log('Cancel clicked');
+        }
+      }]
+    });
+    await actionSheet.present();
   }
 
 }

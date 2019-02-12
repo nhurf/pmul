@@ -6,14 +6,17 @@
     transition: all 250ms ease-in-out !important;
     border-radius: 10px !important;
     margin-bottom: 4px !important;
+    user-select: auto !important;
 }
 .my_message {
     background: #488aff !important;
     color: #000 !important;
+    user-select: auto !important;
 }
 .other_message {
     background: #dcdcdc !important;
     color: #000 !important;
+    user-select: auto !important;
 }
 .time {
     color: #afafaf;
@@ -22,4 +25,5 @@
 }
 .message_row {
     background-color: #fff;
+    user-select: auto !important;
 }

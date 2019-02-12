@@ -13,7 +13,7 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content #content padding>
   <ion-grid>
     <ion-row *ngFor="let message of messages">
       <div *ngIf="message.from === nickname; then notFrom else mFrom"></div>
@@ -21,7 +21,7 @@
         <ion-col size="9" offset="3" class="message" [ngClass]="'message my_message'">
           <div *ngIf="message.isImage; else noImage">
             <span class="user_name">{{ message.from }}:</span><br>
-            <img src="{{ message.text }}" (click)="openImage(message.text)" /><br>
+            <img src="{{ message.text }}" /><br>
             <div class="time">{{message.created | date:'dd.MM hh:MM'}}</div>
           </div>
           <ng-template #noImage>
@@ -36,9 +36,11 @@
               <div class="time">{{message.created | date:'dd.MM hh:MM'}}</div>
             </div>
             <ng-template #noFile>
-              <span class="user_name">{{ message.from }}:</span><br>
-              <span (click)="pressText(message.text)">{{ message.text }}</span><br>
-              <div class="time">{{message.created | date:'dd.MM hh:MM'}}</div>
+              <div (click)="pressText(message.text)">
+                <span class="user_name">{{ message.from }}:</span><br>
+                <span>{{ message.text }}</span><br>
+                <div class="time">{{message.created | date:'dd.MM hh:MM'}}</div>
+              </div>
             </ng-template>
           </ng-template>
         </ion-col>
@@ -48,7 +50,7 @@
         <ion-col size="9" class="message" [ngClass]="'message other_message'">
           <div *ngIf="message.isImage; else noImage">
             <span class="user_name">{{ message.from }}:</span><br>
-            <img src="{{ message.text }}" (click)="openImage(message.text)" /><br>
+            <img src="{{ message.text }}" /><br>
             <div class="time">{{message.created | date:'dd.MM hh:MM'}}</div>
           </div>
           <ng-template #noImage>
@@ -63,9 +65,11 @@
               <div class="time">{{message.created | date:'dd.MM hh:MM'}}</div>
             </div>
             <ng-template #noFile>
-              <span class="user_name">{{ message.from }}:</span><br>
-              <span (click)="pressText(message.text)" >{{ message.text }}</span><br>
-              <div class="time">{{message.created | date:'dd.MM hh:MM'}}</div>
+              <div (click)="pressText(message.text)">
+                <span class="user_name">{{ message.from }}:</span><br>
+                <span>{{ message.text }}</span><br>
+                <div class="time">{{message.created | date:'dd.MM hh:MM'}}</div>
+              </div>
             </ng-template>
           </ng-template>
         </ion-col>

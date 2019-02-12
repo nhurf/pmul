@@ -22,7 +22,6 @@
     "@angular/platform-browser-dynamic": "^7.2.2",
     "@angular/router": "^7.2.2",
     "@ionic-native/android-permissions": "^5.0.0",
-    "@ionic-native/base64": "^5.0.0",
     "@ionic-native/camera": "^5.0.0",
     "@ionic-native/clipboard": "^5.0.0",
     "@ionic-native/core": "^5.0.0",
@@ -42,7 +41,6 @@
     "@ionic/angular": "^4.0.0",
     "@ionic/storage": "^2.2.0",
     "android-camera-permission": "^1.0.0",
-    "com-badrit-base64": "^0.2.0",
     "cordova-android": "7.1.1",
     "cordova-clipboard": "^1.2.1",
     "cordova-plugin-android-permissions": "^1.0.0",
@@ -118,7 +116,6 @@
         "ANDROID_SUPPORT_ANNOTATIONS_VERSION": "27.+"
       },
       "cordova-plugin-ionic-keyboard": {},
-      "com-badrit-base64": {},
       "cordova-plugin-nativeaudio": {},
       "android-camera-permission": {},
       "cordova-sqlite-storage": {},
