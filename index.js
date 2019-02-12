@@ -14,10 +14,6 @@ io.on('connection', (socket) => {
     io.emit('users-changed', {user: socket.nickname, event: 'left'});
   });
 
-  socket.on('myId', (myId) => {
-    io.emit('id', {id: myId, event: 'nuevo peer'});
-  });
-
   socket.on('set-nickname', (nickname) => {
     socket.nickname = nickname;
     io.emit('users-changed', {user: nickname, event: 'joined'});
@@ -25,7 +21,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('add-message', (message) => {
-    io.emit('message', {text: message.text, from: socket.nickname, isImage: message.isImage, created: new Date()});
+    io.emit('message', {text: message.text, from: socket.nickname, isImage: message.isImage, isFile: message.isFile, idFile: message.idFile, created: new Date()});
     console.log('mensaje ' + message.text + ' de ' + socket.nickname);
   });
 
